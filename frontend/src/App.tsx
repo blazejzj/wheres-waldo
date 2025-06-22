@@ -1,26 +1,24 @@
 import homeBg from "./assets/homeBg.jpg";
+import { Outlet } from "react-router";
 import "../index.css";
 
 function App() {
     return (
         <div
-            className="gap-5 w-full h-full bg-cover bg-center flex justify-center items-center flex-col"
+            className="min-h-screen min-w-full bg-cover bg-center flex flex-col"
             style={{
                 backgroundImage: `linear-gradient(rgba(255,255,255,0.5), rgba(255,255,255,0.5)), url(${homeBg})`,
             }}
         >
-            <h1 className="text-7xl uppercase luckyguy">
-                Where's Waldo{" "}
-                <span className="text-2xl text-gray-700">by blazejzj</span>
-            </h1>
-            <div className="w-[30rem] h-[300px] bg-white rounded-md flex flex-col items-center">
-                <h1>Choose any image to start!</h1>
-                <div>
-                    <li>Hello</li>
-                    <li>Hello2</li>
-                    <li>Hello3</li>
-                </div>
-            </div>
+            <header className="py-8 flex justify-center items-center">
+                <h1 className="text-7xl uppercase luckyguy">
+                    Where's Waldo{" "}
+                    <span className="text-2xl text-gray-700">by blazejzj</span>
+                </h1>
+            </header>
+            <main className="flex-1 flex justify-center items-start">
+                <Outlet />
+            </main>
         </div>
     );
 }
