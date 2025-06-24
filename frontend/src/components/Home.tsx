@@ -36,14 +36,14 @@ function Home() {
 
     return (
         <div className="flex flex-col items-center gap-10">
-            <h1 className="text-5xl mt-10 mb-4">
-                Where's Waldo? Pick Your Image!
+            <h1 className="text-5xl mt-10 mb-4 uppercase luckyguy">
+                Pick Your Image!
             </h1>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {IMAGES.map((img) => (
                     <button
                         key={img.id}
-                        className="flex flex-col items-center bg-white rounded-xl shadow-md hover:shadow-lg transition p-4"
+                        className="flex flex-col items-center bg-gray-50 border-1 border-gray-400 rounded-xl shadow-md hover:shadow-xl transition p-4 hover:cursor-pointer"
                         onClick={() => navigate(`/game/${img.id}`)}
                     >
                         <img
@@ -51,7 +51,9 @@ function Home() {
                             alt={img.name}
                             className="w-44 h-44 object-cover rounded-lg mb-2"
                         />
-                        <span className="text-lg font-bold">{img.name}</span>
+                        <span className="text-lg font-bold uppercase luckyguy">
+                            {img.name}
+                        </span>
                     </button>
                 ))}
             </div>
