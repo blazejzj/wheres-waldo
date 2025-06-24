@@ -15,37 +15,19 @@ datasource db {
 }
 
 
-model User {
+model Image {
   id Int @id @default(autoincrement())
   name String
-  sessions Game[]
+  waldoX Float // goin to be normalized
+  waldoY Float
+  score Score[]
 }
 
-model Game {
+model Score {
   id Int @id @default(autoincrement())
-  elapsed Int // to store the time in seconds
-  user User @relation(fields: [userId], references: [id])
-  userId Int
-  guesses Guess[]
-  characters Character[]
-}
-
-model Character {
-  id Int @id @default(autoincrement())
-  name String @unique
-  // these are goign to be our pixel coords
-  x Int
-  y Int
-  game Game? @relation(fields: [gameId], references: [id])
-  gameId Int?
-  guesses Guess[]
-}
-
-model Guess {
-  id Int @id @default(autoincrement())
-  correct Boolean
-  character Character @relation(fields: [charId], references: [id])
-  charId Int
-  game Game @relation(fields: [gameId], references: [id])
-  gameId Int
+  name String
+  time Float
+  image Image @relation(fields: [imageId], references: [id])
+  imageId Int
+  created DateTime @default(now())
 }

@@ -1,0 +1,13 @@
+-- CreateTable
+CREATE TABLE "Score" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "time" DOUBLE PRECISION NOT NULL,
+    "imageId" INTEGER NOT NULL,
+    "created" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "Score_pkey" PRIMARY KEY ("id")
+);
+
+-- AddForeignKey
+ALTER TABLE "Score" ADD CONSTRAINT "Score_imageId_fkey" FOREIGN KEY ("imageId") REFERENCES "Image"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
