@@ -116,9 +116,10 @@ export default function GameBoard() {
               backgroundSize: `${imgSize.width * MAG_ZOOM}px ${
                   imgSize.height * MAG_ZOOM
               }px`,
-              backgroundPosition: `-${
-                  mousePos.x * MAG_ZOOM - MAG_SIZE / 2
-              }px -${mousePos.y * MAG_ZOOM - MAG_SIZE / 2}px`,
+              backgroundPosition: `${-(
+                  mousePos.x * MAG_ZOOM -
+                  MAG_SIZE / 2
+              )}px ${-(mousePos.y * MAG_ZOOM - MAG_SIZE / 2)}px`,
           }
         : {};
 
@@ -143,9 +144,7 @@ export default function GameBoard() {
                 onClick={onImageClick}
                 draggable={false}
             />
-
             {mousePos && !targetPos && <div style={magnifierStyle} />}
-
             {targetPos && (
                 <div
                     className="absolute z-30 flex flex-col items-center p-3 bg-white rounded-lg shadow-lg"
@@ -165,13 +164,13 @@ export default function GameBoard() {
                             backgroundSize: `${imgSize.width * LOCKED_ZOOM}px ${
                                 imgSize.height * LOCKED_ZOOM
                             }px`,
-                            backgroundPosition: `-${
+                            backgroundPosition: `${-(
                                 targetPos.x * LOCKED_ZOOM -
                                 LOCKED_PREVIEW_SIZE / 2
-                            }px -${
+                            )}px ${-(
                                 targetPos.y * LOCKED_ZOOM -
                                 LOCKED_PREVIEW_SIZE / 2
-                            }px`,
+                            )}px`,
                         }}
                     />
                     <h3 className="mt-2 text-xl font-bold">
