@@ -81,9 +81,34 @@ export default function GameBoard() {
         }
     };
 
-    const onConfirm = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const onConfirm = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.stopPropagation();
         setLocked(true);
+
+        if (!targetPos) return;
+        const normX = targetPos.x / imgSize.width;
+        const normY = targetPos.y / imgSize.height;
+
+        try {
+            const response = await fetch("http://localhost:4000/api/check", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    imageId: game.id,
+                    x: normX,
+                    y: normY,
+                }),
+            });
+            const data = await response.json();
+
+            if (data.correct) {
+                alert("You found Waldo!");
+            } else {
+                alert("Not quite! Try again.");
+            }
+        } catch (err) {
+            alert("Error checking Waldo!");
+        }
     };
 
     let previewLeft = targetPos ? targetPos.x + 20 : 0;
