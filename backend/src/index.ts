@@ -16,10 +16,7 @@ app.use(
     })
 );
 
-app.get("/", (req, res) => {
-    res.json({ status: "backend up!" });
-});
-
+// post a single score
 app.post("/api/score", async (req, res) => {
     const { name, time, imageId } = req.body;
     if (!name || !time || !imageId) {
@@ -32,6 +29,7 @@ app.post("/api/score", async (req, res) => {
     res.json({ success: true, score });
 });
 
+// get the top 10 scores
 app.get("/api/leaderboard", async (req, res) => {
     const imageId = Number(req.query.imageId as string);
     if (!imageId) {
@@ -46,6 +44,27 @@ app.get("/api/leaderboard", async (req, res) => {
     res.json({ scores });
 });
 
+app.get("/api/besttimes", async (req, res) => {
+    const images = await prisma.image.findMany({ select: { id: true } });
+
+    const results = await Promise.all(
+        images.map(async (img) => {
+            const best = await prisma.score.findFirst({
+                where: { imageId: img.id },
+                orderBy: { time: "asc" },
+                select: { name: true, time: true },
+            });
+            return {
+                imageId: img.id,
+                name: best?.name || null,
+                time: best?.time || null,
+            };
+        })
+    );
+    res.json({ bestTimes: results });
+});
+
+// check if answer is correct
 app.post("/api/check", async (req, res) => {
     const { imageId, x, y } = req.body;
     if (!imageId || typeof x !== "number" || typeof y !== "number") {
