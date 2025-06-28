@@ -39,7 +39,7 @@ export default function GameLayout() {
                 </div>
             </nav>
             <main className="relative z-10 flex-1 flex items-center justify-center p-6">
-                <Outlet />
+                <Outlet context={{ seconds }} />
             </main>
         </div>
     );

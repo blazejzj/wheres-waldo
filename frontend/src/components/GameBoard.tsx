@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect } from "react";
-import { useParams } from "react-router";
+import { useParams, useOutletContext, useNavigate } from "react-router";
 import dinosaursWaldo from "../assets/dinosaursWaldo.jpeg";
 import troyWaldo from "../assets/troyWaldo.jpeg";
 import undergroundWaldo from "../assets/undergroundWaldo.jpeg";
@@ -17,8 +17,14 @@ const MAG_ZOOM = 2;
 const LOCKED_PREVIEW_SIZE = 200;
 const LOCKED_ZOOM = 3;
 
+type LeaderboardEntry = {
+    name: string;
+    time: number;
+};
+
 export default function GameBoard() {
     const { gameId } = useParams<{ gameId: string }>();
+    const { seconds } = useOutletContext<{ seconds: number }>(); // Make sure GameLayout provides this
     const game = IMAGES.find((img) => img.id === Number(gameId));
     const imgRef = useRef<HTMLImageElement>(null);
 
@@ -30,6 +36,13 @@ export default function GameBoard() {
     );
     const [imgSize, setImgSize] = useState({ width: 0, height: 0 });
     const [locked, setLocked] = useState(false);
+
+    const [showWrongPopup, setShowWrongPopup] = useState(false);
+    const [showNamePopup, setShowNamePopup] = useState(false);
+    const [showLeaderboard, setShowLeaderboard] = useState(false);
+    const [playerName, setPlayerName] = useState("");
+    const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const updateSize = () => {
@@ -90,25 +103,52 @@ export default function GameBoard() {
         const normY = targetPos.y / imgSize.height;
 
         try {
-            const response = await fetch("http://localhost:4000/api/check", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    imageId: game.id,
-                    x: normX,
-                    y: normY,
-                }),
-            });
+            const response = await fetch(
+                `${import.meta.env.VITE_API_URL}/api/check`,
+                {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        imageId: game.id,
+                        x: normX,
+                        y: normY,
+                    }),
+                }
+            );
             const data = await response.json();
 
             if (data.correct) {
-                alert("You found Waldo!");
+                setShowNamePopup(true);
             } else {
-                alert("Not quite! Try again.");
+                setShowWrongPopup(true);
+                setTimeout(() => setShowWrongPopup(false), 1800);
+                setLocked(false);
             }
         } catch (err) {
-            alert("Error checking Waldo!");
+            setShowWrongPopup(true);
+            setTimeout(() => setShowWrongPopup(false), 1800);
+            setLocked(false);
         }
+    };
+
+    const handleNameSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await fetch(`${import.meta.env.VITE_API_URL}/api/score`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                name: playerName,
+                time: seconds,
+                imageId: game.id,
+            }),
+        });
+        const res = await fetch(
+            `${import.meta.env.VITE_API_URL}/api/leaderboard?imageId=${game.id}`
+        );
+        const data = await res.json();
+        setLeaderboard(data.scores);
+        setShowNamePopup(false);
+        setShowLeaderboard(true);
     };
 
     let previewLeft = targetPos ? targetPos.x + 20 : 0;
@@ -209,6 +249,76 @@ export default function GameBoard() {
                             Confirm
                         </button>
                     )}
+                </div>
+            )}
+
+            {showWrongPopup && (
+                <div className="fixed top-8 left-1/2 -translate-x-1/2 bg-red-100 border border-red-400 text-red-700 px-6 py-3 rounded z-50">
+                    Not quite! Waldo is sneakier than you may think.
+                </div>
+            )}
+
+            {showNamePopup && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <form
+                        onSubmit={handleNameSubmit}
+                        className="bg-white p-8 rounded-xl shadow-xl flex flex-col items-center gap-4"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <h2 className="text-3xl font-bold luckyguy">
+                            You found Waldo!
+                        </h2>
+                        <p className="luckyguy text-xl">
+                            Enter your name for the leaderboard:
+                        </p>
+                        <input
+                            value={playerName}
+                            onChange={(e) => setPlayerName(e.target.value)}
+                            className="border px-2 py-1 rounded"
+                            required
+                            maxLength={20}
+                        />
+                        <button
+                            type="submit"
+                            className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-bold text-xl hover:cursor-pointer"
+                        >
+                            Submit Your Score
+                        </button>
+                    </form>
+                </div>
+            )}
+
+            {showLeaderboard && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                    <div className="bg-white p-8 rounded-xl shadow-xl flex flex-col items-center gap-4">
+                        <h2 className="text-3xl font-bold mb-4 uppercase luckyguy">
+                            Leaderboard
+                        </h2>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th className="px-4">Name</th>
+                                    <th className="px-4">Time (s)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {leaderboard.map((score, i) => (
+                                    <tr key={i}>
+                                        <td className="px-4">{score.name}</td>
+                                        <td className="px-4">
+                                            {score.time.toFixed(2)}
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                        <button
+                            className="bg-gray-600 hover:bg-gray-500 text-white px-4 py-2 rounded-md font-bold text-xl hover:cursor-pointer mt-3"
+                            onClick={() => navigate("/")}
+                        >
+                            Back to Home
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
